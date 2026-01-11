@@ -1,0 +1,11 @@
+{
+  "onboarding.firstName": "Prénom",
+  "onboarding.lastName": "Nom de famille",
+  "onboarding.phone": "Numéro de téléphone",
+  "onboarding.corporationNumber": "Numéro de société",
+  "onboarding.submit": "Soumettre",
+  "validation.required": "Ce champ est obligatoire",
+  "validation.invalidPhone": "Numéro de téléphone invalide",
+  "validation.invalidCorporationNumber": "Numéro de société invalide",
+  "validation.maxLength": "Maximum {{max}} caractères"
+}

@@ -44,6 +44,11 @@ Standard testing combo for React Native
 
 Navigation library is an overkill for this scope
 
+### Localization: i18next + react-i18next + react-native-localize
+
+- i18next is the most widely adopted i18n framework (~4M weekly downloads)
+- Flat JSON for simplicity and easy handoff to translators
+
 ### State Management: Local state only passed via DI
 
 Global state management is an outdated anti-pattern for mobile development.
