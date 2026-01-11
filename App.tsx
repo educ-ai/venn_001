@@ -1,20 +1,13 @@
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {ThemeProvider} from 'theme/ThemeContext';
+import {HomeScreen} from 'features/home/HomeScreen';
 
 function App(): React.JSX.Element {
   return (
-    <View style={styles.container}>
-      <Text>VennTask</Text>
-    </View>
+    <ThemeProvider>
+      <HomeScreen />
+    </ThemeProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 export default App;
