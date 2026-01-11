@@ -14,5 +14,5 @@
   "validation.required": "Ce champ est obligatoire",
   "validation.invalidPhone": "Numéro de téléphone invalide",
   "validation.invalidCorporationNumber": "Numéro de société invalide",
-  "validation.maxLength": "Maximum {{max}} caractères"
+  "validation.maxLength": "Maximum 50 caractères"
 }

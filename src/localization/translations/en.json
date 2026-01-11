@@ -14,5 +14,5 @@
   "validation.required": "This field is required",
   "validation.invalidPhone": "Invalid phone number",
   "validation.invalidCorporationNumber": "Invalid corporation number",
-  "validation.maxLength": "Maximum {{max}} characters"
+  "validation.maxLength": "Maximum 50 characters"
 }

@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useTheme } from 'theme/ThemeContext';
 
-type AccessoryState = 'none' | 'verifying' | 'correct' | 'wrong';
+type AccessoryState = 'none' | 'verifying' | 'correct';
 
 type FormTextInputProps = {
   value: string;
@@ -42,10 +42,6 @@ export function FormTextInput({
       case 'correct':
         return (
           <Text style={{ fontSize: typography.medium, color: '#22C55E' }}>✓</Text>
-        );
-      case 'wrong':
-        return (
-          <Text style={{ fontSize: typography.medium, color: colors.foregroundDestructive }}>✗</Text>
         );
       default:
         return null;
