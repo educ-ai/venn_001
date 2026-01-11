@@ -39,12 +39,17 @@ describe('useOnboardingFormStep1', () => {
       expect(result.current.firstName.value).toBe('');
     });
 
+    it('has empty lastName value', () => {
+      const { result } = renderTestHook();
+      expect(result.current.lastName.value).toBe('');
+    });
+
     it('has isSubmitting as false', () => {
       const { result } = renderTestHook();
       expect(result.current.isSubmitting).toBe(false);
     });
 
-    it('has isSubmitDisabled as true when firstName is empty', () => {
+    it('has isSubmitDisabled as true when fields are empty', () => {
       const { result } = renderTestHook();
       expect(result.current.isSubmitDisabled).toBe(true);
     });
@@ -92,9 +97,67 @@ describe('useOnboardingFormStep1', () => {
     });
   });
 
-  describe('isSubmitDisabled', () => {
-    it('is true when firstName is empty', () => {
+  describe('lastName.onChange', () => {
+    it('updates lastName value', () => {
       const { result } = renderTestHook();
+      act(() => {
+        result.current.lastName.onChange('Doe');
+      });
+      expect(result.current.lastName.value).toBe('Doe');
+    });
+
+    it('filters out numbers from input', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.lastName.onChange('Doe123');
+      });
+      expect(result.current.lastName.value).toBe('Doe');
+    });
+
+    it('allows apostrophes in names', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.lastName.onChange("O'Connor");
+      });
+      expect(result.current.lastName.value).toBe("O'Connor");
+    });
+
+    it('allows hyphens in names', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.lastName.onChange('Smith-Jones');
+      });
+      expect(result.current.lastName.value).toBe('Smith-Jones');
+    });
+
+    it('allows Unicode letters', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.lastName.onChange('Müller');
+      });
+      expect(result.current.lastName.value).toBe('Müller');
+    });
+  });
+
+  describe('isSubmitDisabled', () => {
+    it('is true when both fields are empty', () => {
+      const { result } = renderTestHook();
+      expect(result.current.isSubmitDisabled).toBe(true);
+    });
+
+    it('is true when firstName is empty but lastName has value', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.lastName.onChange('Doe');
+      });
+      expect(result.current.isSubmitDisabled).toBe(true);
+    });
+
+    it('is true when lastName is empty but firstName has value', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.firstName.onChange('John');
+      });
       expect(result.current.isSubmitDisabled).toBe(true);
     });
 
@@ -102,33 +165,45 @@ describe('useOnboardingFormStep1', () => {
       const { result } = renderTestHook();
       act(() => {
         result.current.firstName.onChange('   ');
+        result.current.lastName.onChange('Doe');
       });
       expect(result.current.isSubmitDisabled).toBe(true);
     });
 
-    it('is false when firstName has value', () => {
+    it('is true when lastName is only whitespace', () => {
       const { result } = renderTestHook();
       act(() => {
         result.current.firstName.onChange('John');
+        result.current.lastName.onChange('   ');
+      });
+      expect(result.current.isSubmitDisabled).toBe(true);
+    });
+
+    it('is false when both fields have values', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.firstName.onChange('John');
+        result.current.lastName.onChange('Doe');
       });
       expect(result.current.isSubmitDisabled).toBe(false);
     });
   });
 
   describe('handleSubmit', () => {
-    it('calls profileService.submit with firstName', async () => {
+    it('calls profileService.submit with firstName and lastName', async () => {
       mockSubmit.mockResolvedValue({});
       const { result } = renderTestHook();
 
       act(() => {
         result.current.firstName.onChange('John');
+        result.current.lastName.onChange('Doe');
       });
 
       await act(() => result.current.handleSubmit());
 
       expect(mockSubmit).toHaveBeenCalledWith({
         firstName: 'John',
-        lastName: '',
+        lastName: 'Doe',
         corporationNumber: '',
         phone: '',
       });
@@ -140,6 +215,7 @@ describe('useOnboardingFormStep1', () => {
 
       act(() => {
         result.current.firstName.onChange('John');
+        result.current.lastName.onChange('Doe');
       });
 
       await act(() => result.current.handleSubmit());
@@ -154,6 +230,7 @@ describe('useOnboardingFormStep1', () => {
 
       act(() => {
         result.current.firstName.onChange('John');
+        result.current.lastName.onChange('Doe');
       });
 
       await act(() => result.current.handleSubmit());
@@ -174,6 +251,7 @@ describe('useOnboardingFormStep1', () => {
 
       act(() => {
         result.current.firstName.onChange('John');
+        result.current.lastName.onChange('Doe');
       });
 
       act(() => {
@@ -191,18 +269,21 @@ describe('useOnboardingFormStep1', () => {
   });
 
   describe('resetForm', () => {
-    it('clears firstName value', () => {
+    it('clears firstName and lastName values', () => {
       const { result } = renderTestHook();
 
       act(() => {
         result.current.firstName.onChange('John');
+        result.current.lastName.onChange('Doe');
       });
       expect(result.current.firstName.value).toBe('John');
+      expect(result.current.lastName.value).toBe('Doe');
 
       act(() => {
         result.current.resetForm();
       });
       expect(result.current.firstName.value).toBe('');
+      expect(result.current.lastName.value).toBe('');
     });
   });
 });

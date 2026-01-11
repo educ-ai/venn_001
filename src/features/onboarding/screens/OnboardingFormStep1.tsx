@@ -23,6 +23,7 @@ export function OnboardingFormStep1(): React.JSX.Element {
 
   const {
     firstName,
+    lastName,
     isSubmitting,
     isSubmitDisabled,
     handleSubmit,
@@ -59,6 +60,19 @@ export function OnboardingFormStep1(): React.JSX.Element {
                 editable={!isSubmitting}
               />
               {firstName.error && <FormErrorText message={firstName.error} />}
+            </View>
+
+            <View style={{ gap: spacing.xs }}>
+              <FormTextInput
+                value={lastName.value}
+                onChangeText={lastName.onChange}
+                onBlur={lastName.onBlur}
+                placeholder={t('onboarding.placeholder.lastName')}
+                maxLength={50}
+                error={!!lastName.error}
+                editable={!isSubmitting}
+              />
+              {lastName.error && <FormErrorText message={lastName.error} />}
             </View>
 
             <OnboardingFormButton
