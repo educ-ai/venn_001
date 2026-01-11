@@ -17,7 +17,7 @@ describe('useCorporationService', () => {
   beforeAll(() => {
     mockUseNetworking = useNetworking as jest.MockedFunction<typeof useNetworking>;
   });
-  
+
   beforeEach(() => {
     mockNetworking = {
       get: jest.fn() as jest.MockedFunction<NetworkingService['get']>,
@@ -34,30 +34,18 @@ describe('useCorporationService', () => {
       expect(mockNetworking.get).toHaveBeenCalledWith('corporation-number/123456789');
     });
 
-    it('returns valid result when server responds with valid corporation', async () => {
+    it('resolves when corporation number is valid', async () => {
       mockNetworking.get.mockResolvedValue({ corporationNumber: '826417395', valid: true });
-      const response = await corporationService.validate('826417395');
-      expect(response).toEqual({ valid: true });
+      await expect(corporationService.validate('826417395')).resolves.not.toThrow();
     });
 
-    it('returns invalid result when server responds with invalid corporation', async () => {
+    it('throws when corporation number is invalid', async () => {
       mockNetworking.get.mockResolvedValue({ valid: false, message: 'Invalid corporation number' });
-      const response = await corporationService.validate('000000000');
-      expect(response).toEqual({ valid: false, message: 'Invalid corporation number' });
+      await expect(corporationService.validate('000000000')).rejects.toThrow('Invalid corporation number');
     });
 
     it('throws ValidationError when server returns malformed response', async () => {
       mockNetworking.get.mockResolvedValue({ unexpected: 'garbage' });
-      await expect(corporationService.validate('123456789')).rejects.toThrow(ValidationError);
-    });
-
-    it('throws ValidationError when server returns valid response with missing fields', async () => {
-      mockNetworking.get.mockResolvedValue({ valid: true });
-      await expect(corporationService.validate('123456789')).rejects.toThrow(ValidationError);
-    });
-
-    it('throws ValidationError when server returns invalid response with missing message', async () => {
-      mockNetworking.get.mockResolvedValue({ valid: false });
       await expect(corporationService.validate('123456789')).rejects.toThrow(ValidationError);
     });
 

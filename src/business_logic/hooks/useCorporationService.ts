@@ -8,11 +8,6 @@ export class ValidationError extends Error {
   }
 }
 
-export type CorporationValidationResult = {
-  valid: boolean;
-  message?: string;
-};
-
 const responseSchema = z.union([
   z.object({
     corporationNumber: z.string(),
@@ -28,7 +23,7 @@ export function useCorporationService() {
   const networking = useNetworking();
 
   return {
-    validate: async (number: string): Promise<CorporationValidationResult> => {
+    validate: async (number: string): Promise<void> => {
       const response = await networking.get(`corporation-number/${number}`);
       const parsed = responseSchema.safeParse(response);
 
@@ -36,14 +31,9 @@ export function useCorporationService() {
         throw new ValidationError();
       }
 
-      if (parsed.data.valid) {
-        return { valid: true };
+      if (!parsed.data.valid) {
+        throw new Error(parsed.data.message);
       }
-
-      return {
-        valid: false,
-        message: parsed.data.message
-      };
     },
   };
 }
