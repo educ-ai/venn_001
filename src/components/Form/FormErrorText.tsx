@@ -2,11 +2,11 @@ import React from 'react';
 import { Text } from 'react-native';
 import { useTheme } from 'theme/ThemeContext';
 
-type ErrorTextProps = {
+type FormErrorTextProps = {
   message: string;
 };
 
-export function ErrorText({ message }: ErrorTextProps): React.JSX.Element {
+export function FormErrorText({ message }: FormErrorTextProps): React.JSX.Element {
   const { colors, typography } = useTheme();
 
   return (
