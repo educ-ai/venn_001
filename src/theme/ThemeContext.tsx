@@ -1,10 +1,18 @@
-import React, { createContext, useContext, type ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  type ReactNode,
+} from 'react';
 import { useColorScheme } from 'react-native';
 import { colors, type ThemeColors } from './colors';
+import { typography, type Typography } from './typography';
 
 type ThemeContextValue = {
   colors: ThemeColors;
+  typography: Typography;
   isDark: boolean;
+  toggleTheme: () => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
@@ -16,12 +24,20 @@ type ThemeProviderProps = {
 export function ThemeProvider({
   children,
 }: ThemeProviderProps): React.JSX.Element {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const systemColorScheme = useColorScheme();
+  const [overrideDark, setOverrideDark] = useState<boolean | null>(null);
+
+  const isDark = overrideDark ?? systemColorScheme === 'dark';
+
+  const toggleTheme = () => {
+    setOverrideDark(prev => (prev === null ? !isDark : !prev));
+  };
 
   const value: ThemeContextValue = {
     colors: isDark ? colors.dark : colors.light,
+    typography,
     isDark,
+    toggleTheme,
   };
 
   return (
