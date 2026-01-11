@@ -1,13 +1,13 @@
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
-import {useTheme} from 'theme/ThemeContext';
+import { StyleSheet, Text, View } from 'react-native';
+import { useTheme } from 'theme/ThemeContext';
 
 export function HomeScreen(): React.JSX.Element {
-  const {colors} = useTheme();
+  const { colors } = useTheme();
 
   return (
-    <View style={[styles.container, {backgroundColor: colors.background}]}>
-      <Text style={{color: colors.text}}>HomeScreen</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={{ color: colors.text }}>HomeScreen</Text>
     </View>
   );
 }

@@ -9,4 +9,4 @@ export const colors = {
   },
 } as const;
 
-export type ThemeColors = typeof colors.light;
+export type ThemeColors = typeof colors.light | typeof colors.dark;

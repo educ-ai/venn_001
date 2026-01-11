@@ -1,6 +1,6 @@
-import React, {createContext, useContext, type ReactNode} from 'react';
-import {useColorScheme} from 'react-native';
-import {colors, type ThemeColors} from './colors';
+import React, { createContext, useContext, type ReactNode } from 'react';
+import { useColorScheme } from 'react-native';
+import { colors, type ThemeColors } from './colors';
 
 type ThemeContextValue = {
   colors: ThemeColors;
@@ -13,7 +13,9 @@ type ThemeProviderProps = {
   children: ReactNode;
 };
 
-export function ThemeProvider({children}: ThemeProviderProps): React.JSX.Element {
+export function ThemeProvider({
+  children,
+}: ThemeProviderProps): React.JSX.Element {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
