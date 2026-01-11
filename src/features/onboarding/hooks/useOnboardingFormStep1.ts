@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useProfileService } from 'business_logic/hooks/useProfileService';
 import { filterNameInput } from 'features/onboarding/utils/nameFilter';
+import { filterPhoneInput } from 'features/onboarding/utils/phoneFilter';
+import { filterCorporationNumberInput } from 'features/onboarding/utils/corporationNumberFilter';
 
 type UseOnboardingFormStep1Props = {
   onSubmitSuccess: () => void;
@@ -17,6 +19,8 @@ type FieldState = {
 export type OnboardingFormStep1State = {
   firstName: FieldState;
   lastName: FieldState;
+  phone: FieldState;
+  corporationNumber: FieldState;
   isSubmitting: boolean;
   isSubmitDisabled: boolean;
   handleSubmit: () => Promise<void>;
@@ -31,16 +35,22 @@ export function useOnboardingFormStep1({
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [corporationNumber, setCorporationNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isSubmitDisabled =
     isSubmitting ||
     firstName.trim().length === 0 ||
-    lastName.trim().length === 0;
+    lastName.trim().length === 0 ||
+    phone.trim().length === 0 ||
+    corporationNumber.length !== 9;
 
   const resetForm = () => {
     setFirstName('');
     setLastName('');
+    setPhone('');
+    setCorporationNumber('');
   };
 
   const handleSubmit = async () => {
@@ -49,8 +59,8 @@ export function useOnboardingFormStep1({
       await profileService.submit({
         firstName,
         lastName,
-        corporationNumber: '',
-        phone: '',
+        corporationNumber,
+        phone,
       });
       onSubmitSuccess();
     } catch (error) {
@@ -70,6 +80,14 @@ export function useOnboardingFormStep1({
     setLastName(filterNameInput(text));
   };
 
+  const handlePhoneChange = (text: string) => {
+    setPhone(filterPhoneInput(text));
+  };
+
+  const handleCorporationNumberChange = (text: string) => {
+    setCorporationNumber(filterCorporationNumberInput(text));
+  };
+
   return {
     firstName: {
       value: firstName,
@@ -80,6 +98,18 @@ export function useOnboardingFormStep1({
     lastName: {
       value: lastName,
       onChange: handleLastNameChange,
+      onBlur: () => {},
+      error: undefined,
+    },
+    phone: {
+      value: phone,
+      onChange: handlePhoneChange,
+      onBlur: () => {},
+      error: undefined,
+    },
+    corporationNumber: {
+      value: corporationNumber,
+      onChange: handleCorporationNumberChange,
       onBlur: () => {},
       error: undefined,
     },

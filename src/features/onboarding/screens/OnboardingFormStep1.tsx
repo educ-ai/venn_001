@@ -24,6 +24,8 @@ export function OnboardingFormStep1(): React.JSX.Element {
   const {
     firstName,
     lastName,
+    phone,
+    corporationNumber,
     isSubmitting,
     isSubmitDisabled,
     handleSubmit,
@@ -73,6 +75,35 @@ export function OnboardingFormStep1(): React.JSX.Element {
                 editable={!isSubmitting}
               />
               {lastName.error && <FormErrorText message={lastName.error} />}
+            </View>
+
+            <View style={{ gap: spacing.xs }}>
+              <FormTextInput
+                value={phone.value}
+                onChangeText={phone.onChange}
+                onBlur={phone.onBlur}
+                placeholder={t('onboarding.placeholder.phone')}
+                keyboardType="phone-pad"
+                error={!!phone.error}
+                editable={!isSubmitting}
+              />
+              {phone.error && <FormErrorText message={phone.error} />}
+            </View>
+
+            <View style={{ gap: spacing.xs }}>
+              <FormTextInput
+                value={corporationNumber.value}
+                onChangeText={corporationNumber.onChange}
+                onBlur={corporationNumber.onBlur}
+                placeholder={t('onboarding.placeholder.corporationNumber')}
+                maxLength={9}
+                keyboardType="number-pad"
+                error={!!corporationNumber.error}
+                editable={!isSubmitting}
+              />
+              {corporationNumber.error && (
+                <FormErrorText message={corporationNumber.error} />
+              )}
             </View>
 
             <OnboardingFormButton

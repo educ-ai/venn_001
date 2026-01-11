@@ -44,6 +44,16 @@ describe('useOnboardingFormStep1', () => {
       expect(result.current.lastName.value).toBe('');
     });
 
+    it('has empty phone value', () => {
+      const { result } = renderTestHook();
+      expect(result.current.phone.value).toBe('');
+    });
+
+    it('has empty corporationNumber value', () => {
+      const { result } = renderTestHook();
+      expect(result.current.corporationNumber.value).toBe('');
+    });
+
     it('has isSubmitting as false', () => {
       const { result } = renderTestHook();
       expect(result.current.isSubmitting).toBe(false);
@@ -139,73 +149,186 @@ describe('useOnboardingFormStep1', () => {
     });
   });
 
+  describe('phone.onChange', () => {
+    it('updates phone value', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.phone.onChange('+13062776103');
+      });
+      expect(result.current.phone.value).toBe('+13062776103');
+    });
+
+    it('allows + only at the beginning', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.phone.onChange('+1306+2776103');
+      });
+      expect(result.current.phone.value).toBe('+13062776103');
+    });
+
+    it('filters out letters', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.phone.onChange('+1abc3062776103');
+      });
+      expect(result.current.phone.value).toBe('+13062776103');
+    });
+
+    it('filters out special characters except + at start', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.phone.onChange('+1-306-277-6103');
+      });
+      expect(result.current.phone.value).toBe('+13062776103');
+    });
+
+    it('allows digit as first character', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.phone.onChange('13062776103');
+      });
+      expect(result.current.phone.value).toBe('13062776103');
+    });
+  });
+
+  describe('corporationNumber.onChange', () => {
+    it('updates corporationNumber value', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.corporationNumber.onChange('123456789');
+      });
+      expect(result.current.corporationNumber.value).toBe('123456789');
+    });
+
+    it('filters out non-digit characters', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.corporationNumber.onChange('12a34b56c789');
+      });
+      expect(result.current.corporationNumber.value).toBe('123456789');
+    });
+
+    it('limits to 9 characters', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.corporationNumber.onChange('1234567890123');
+      });
+      expect(result.current.corporationNumber.value).toBe('123456789');
+    });
+
+    it('filters out special characters', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.corporationNumber.onChange('123-456-789');
+      });
+      expect(result.current.corporationNumber.value).toBe('123456789');
+    });
+  });
+
   describe('isSubmitDisabled', () => {
-    it('is true when both fields are empty', () => {
+    const fillAllFields = (result: any) => {
+      act(() => {
+        result.current.firstName.onChange('John');
+        result.current.lastName.onChange('Doe');
+        result.current.phone.onChange('+13062776103');
+        result.current.corporationNumber.onChange('123456789');
+      });
+    };
+
+    it('is true when all fields are empty', () => {
       const { result } = renderTestHook();
       expect(result.current.isSubmitDisabled).toBe(true);
     });
 
-    it('is true when firstName is empty but lastName has value', () => {
+    it('is true when firstName is empty', () => {
       const { result } = renderTestHook();
       act(() => {
         result.current.lastName.onChange('Doe');
+        result.current.phone.onChange('+13062776103');
+        result.current.corporationNumber.onChange('123456789');
       });
       expect(result.current.isSubmitDisabled).toBe(true);
     });
 
-    it('is true when lastName is empty but firstName has value', () => {
+    it('is true when lastName is empty', () => {
       const { result } = renderTestHook();
       act(() => {
         result.current.firstName.onChange('John');
+        result.current.phone.onChange('+13062776103');
+        result.current.corporationNumber.onChange('123456789');
+      });
+      expect(result.current.isSubmitDisabled).toBe(true);
+    });
+
+    it('is true when phone is empty', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.firstName.onChange('John');
+        result.current.lastName.onChange('Doe');
+        result.current.corporationNumber.onChange('123456789');
+      });
+      expect(result.current.isSubmitDisabled).toBe(true);
+    });
+
+    it('is true when corporationNumber is less than 9 digits', () => {
+      const { result } = renderTestHook();
+      act(() => {
+        result.current.firstName.onChange('John');
+        result.current.lastName.onChange('Doe');
+        result.current.phone.onChange('+13062776103');
+        result.current.corporationNumber.onChange('12345678');
       });
       expect(result.current.isSubmitDisabled).toBe(true);
     });
 
     it('is true when firstName is only whitespace', () => {
       const { result } = renderTestHook();
+      fillAllFields(result);
       act(() => {
         result.current.firstName.onChange('   ');
-        result.current.lastName.onChange('Doe');
       });
       expect(result.current.isSubmitDisabled).toBe(true);
     });
 
     it('is true when lastName is only whitespace', () => {
       const { result } = renderTestHook();
+      fillAllFields(result);
       act(() => {
-        result.current.firstName.onChange('John');
         result.current.lastName.onChange('   ');
       });
       expect(result.current.isSubmitDisabled).toBe(true);
     });
 
-    it('is false when both fields have values', () => {
+    it('is false when all fields have valid values', () => {
       const { result } = renderTestHook();
-      act(() => {
-        result.current.firstName.onChange('John');
-        result.current.lastName.onChange('Doe');
-      });
+      fillAllFields(result);
       expect(result.current.isSubmitDisabled).toBe(false);
     });
   });
 
   describe('handleSubmit', () => {
-    it('calls profileService.submit with firstName and lastName', async () => {
-      mockSubmit.mockResolvedValue({});
-      const { result } = renderTestHook();
-
+    const fillAllFields = (result: any) => {
       act(() => {
         result.current.firstName.onChange('John');
         result.current.lastName.onChange('Doe');
+        result.current.phone.onChange('+13062776103');
+        result.current.corporationNumber.onChange('123456789');
       });
+    };
+
+    it('calls profileService.submit with all fields', async () => {
+      mockSubmit.mockResolvedValue({});
+      const { result } = renderTestHook();
+
+      fillAllFields(result);
 
       await act(() => result.current.handleSubmit());
 
       expect(mockSubmit).toHaveBeenCalledWith({
         firstName: 'John',
         lastName: 'Doe',
-        corporationNumber: '',
-        phone: '',
+        corporationNumber: '123456789',
+        phone: '+13062776103',
       });
     });
 
@@ -213,10 +336,7 @@ describe('useOnboardingFormStep1', () => {
       mockSubmit.mockResolvedValue({});
       const { result } = renderTestHook();
 
-      act(() => {
-        result.current.firstName.onChange('John');
-        result.current.lastName.onChange('Doe');
-      });
+      fillAllFields(result);
 
       await act(() => result.current.handleSubmit());
 
@@ -228,10 +348,7 @@ describe('useOnboardingFormStep1', () => {
       mockSubmit.mockRejectedValue(new Error('Network error'));
       const { result } = renderTestHook();
 
-      act(() => {
-        result.current.firstName.onChange('John');
-        result.current.lastName.onChange('Doe');
-      });
+      fillAllFields(result);
 
       await act(() => result.current.handleSubmit());
 
@@ -249,10 +366,7 @@ describe('useOnboardingFormStep1', () => {
 
       const { result } = renderTestHook();
 
-      act(() => {
-        result.current.firstName.onChange('John');
-        result.current.lastName.onChange('Doe');
-      });
+      fillAllFields(result);
 
       act(() => {
         result.current.handleSubmit();
@@ -269,21 +383,27 @@ describe('useOnboardingFormStep1', () => {
   });
 
   describe('resetForm', () => {
-    it('clears firstName and lastName values', () => {
+    it('clears all field values', () => {
       const { result } = renderTestHook();
 
       act(() => {
         result.current.firstName.onChange('John');
         result.current.lastName.onChange('Doe');
+        result.current.phone.onChange('+13062776103');
+        result.current.corporationNumber.onChange('123456789');
       });
       expect(result.current.firstName.value).toBe('John');
       expect(result.current.lastName.value).toBe('Doe');
+      expect(result.current.phone.value).toBe('+13062776103');
+      expect(result.current.corporationNumber.value).toBe('123456789');
 
       act(() => {
         result.current.resetForm();
       });
       expect(result.current.firstName.value).toBe('');
       expect(result.current.lastName.value).toBe('');
+      expect(result.current.phone.value).toBe('');
+      expect(result.current.corporationNumber.value).toBe('');
     });
   });
 });
