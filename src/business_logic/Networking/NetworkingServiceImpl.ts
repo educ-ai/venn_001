@@ -1,4 +1,4 @@
-import { NetworkingService } from './NetworkingService';
+import { NetworkingService } from 'business_logic/Networking/NetworkingService';
 
 export class HttpError extends Error {
   constructor(public status: number, message: string) {

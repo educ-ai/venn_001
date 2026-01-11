@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { NetworkingService } from './NetworkingService';
+import { NetworkingService } from 'business_logic/Networking/NetworkingService';
 
 const NetworkingContext = createContext<NetworkingService | null>(null);
 

@@ -7,6 +7,7 @@ type ButtonProps = {
   onPress: () => void;
   disabled?: boolean;
   icon?: React.ReactNode;
+  width?: number;
 };
 
 export function Button({
@@ -14,6 +15,7 @@ export function Button({
   onPress,
   disabled = false,
   icon,
+  width,
 }: ButtonProps): React.JSX.Element {
   const { colors, typography } = useTheme();
 
@@ -30,6 +32,7 @@ export function Button({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
+        ...(width !== undefined && { width }),
       }}>
       <Text
         style={{

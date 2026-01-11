@@ -19,6 +19,7 @@ type FormTextInputProps = {
   maxLength?: number;
   error?: boolean;
   accessoryState?: AccessoryState;
+  editable?: boolean;
 };
 
 export function FormTextInput({
@@ -30,6 +31,7 @@ export function FormTextInput({
   maxLength,
   error = false,
   accessoryState = 'none',
+  editable = true,
 }: FormTextInputProps): React.JSX.Element {
   const { colors, typography } = useTheme();
 
@@ -67,10 +69,11 @@ export function FormTextInput({
         onBlur={onBlur}
         placeholder={placeholder}
         keyboardType={keyboardType}
+        editable={editable}
         {...(maxLength !== undefined && { maxLength })}
         style={{
           flex: 1,
-          color: colors.foreground,
+          color: editable ? colors.foreground : colors.foregroundMuted,
           fontSize: typography.medium,
           fontFamily: typography.fontFamily,
           paddingVertical: 12,

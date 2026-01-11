@@ -5,12 +5,14 @@ import React, {
   type ReactNode,
 } from 'react';
 import { useColorScheme } from 'react-native';
-import { colors, type ThemeColors } from './colors';
-import { typography, type Typography } from './typography';
+import { colors, type ThemeColors } from 'theme/colors';
+import { typography, type Typography } from 'theme/typography';
+import { spacing, type Spacing } from 'theme/spacing';
 
 type ThemeContextValue = {
   colors: ThemeColors;
   typography: Typography;
+  spacing: Spacing;
   isDark: boolean;
   toggleTheme: () => void;
 };
@@ -36,6 +38,7 @@ export function ThemeProvider({
   const value: ThemeContextValue = {
     colors: isDark ? colors.dark : colors.light,
     typography,
+    spacing,
     isDark,
     toggleTheme,
   };

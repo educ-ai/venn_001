@@ -1,24 +1,23 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from 'theme/ThemeContext';
+import { ThemeToggle } from 'components/ThemeToggle';
+import { OnboardingFormStep1 } from 'features/onboarding/screens/OnboardingFormStep1';
 
 export function HomeScreen(): React.JSX.Element {
-  const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { colors, spacing } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={{ color: colors.text }}>{t('onboarding.firstName')}</Text>
-      <Text style={{ color: colors.text }}>{t('onboarding.submit')}</Text>
-    </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <View
+        style={{
+          paddingHorizontal: spacing.lg,
+          paddingVertical: spacing.sm,
+        }}>
+        <ThemeToggle />
+      </View>
+      <OnboardingFormStep1 />
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
