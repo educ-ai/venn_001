@@ -31,7 +31,10 @@ describe('useCorporationService', () => {
     it('calls networking with correct endpoint', async () => {
       mockNetworking.get.mockResolvedValue({ corporationNumber: '123456789', valid: true });
       await corporationService.validate('123456789');
-      expect(mockNetworking.get).toHaveBeenCalledWith('corporation-number/123456789');
+      expect(mockNetworking.get).toHaveBeenCalledWith(
+        'corporation-number/123456789',
+        expect.objectContaining({ signal: undefined }),
+      );
     });
 
     it('resolves when corporation number is valid', async () => {

@@ -1,4 +1,8 @@
-import { NetworkingService } from 'business_logic/Networking/NetworkingService';
+import {
+  NetworkingService,
+  RequestOptions,
+  ResponseContentType,
+} from 'business_logic/Networking/NetworkingService';
 
 export class HttpError extends Error {
   constructor(public status: number, message: string) {
@@ -15,7 +19,7 @@ enum HttpMethod {
   PATCH = 'PATCH',
 }
 
-enum ContentType {
+enum RequestContentType {
   JSON = 'application/json',
 }
 
@@ -24,56 +28,85 @@ class NetworkingServiceImpl implements NetworkingService {
 
   private async sendRequest(
     endpoint: string,
-    options: RequestInit,
-    contentType: ContentType | null = null,
-    expectResponse: boolean = true,
+    fetchOptions: RequestInit,
+    requestContentType: RequestContentType | null = null,
+    expectedResponseType: ResponseContentType = ResponseContentType.JSON,
   ) {
-    if (contentType) {
-      options.headers = {
-        ...options.headers,
-        'Content-Type': contentType,
+    if (requestContentType) {
+      fetchOptions.headers = {
+        ...fetchOptions.headers,
+        'Content-Type': requestContentType,
       };
     }
 
-    try {
-      const response = await fetch(`${this.apiUrlPath}/${endpoint}`, options);
+    const url = `${this.apiUrlPath}/${endpoint}`;
+    console.log('[NetworkingServiceImpl] Request:', fetchOptions.method, url);
 
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
+    try {
+      const response = await fetch(url, fetchOptions);
+
+      console.log('[NetworkingServiceImpl] Response status:', response.status, response.ok ? 'OK' : 'FAIL');
+
+      const responseContentType = response.headers.get('content-type') || '';
+      console.log('[NetworkingServiceImpl] Content-Type:', responseContentType);
+
+      const isJsonResponse = responseContentType.includes('application/json');
+      const isPlainTextResponse = responseContentType.includes('text/plain');
+
+      if (isJsonResponse) {
         const jsonObject = await response.json();
+        console.log('[NetworkingServiceImpl] JSON response:', JSON.stringify(jsonObject));
+
         if (response.ok) {
           return jsonObject;
         }
 
+        console.log('[NetworkingServiceImpl] Throwing HttpError:', response.status, jsonObject['message']);
         throw new HttpError(response.status, jsonObject['message']);
-      } else {
-        if (response.ok && !expectResponse) {
-          return {};
-        }
+      } else if (isPlainTextResponse) {
         const text = await response.text();
-        throw new HttpError(response.status, text || 'Response was not JSON');
+        console.log('[NetworkingServiceImpl] Plain text response:', text);
+
+        if (response.ok && expectedResponseType === ResponseContentType.PlainText) {
+          return { message: text };
+        }
+
+        throw new HttpError(response.status, text || 'Unexpected plain text response');
+      } else {
+        const text = await response.text();
+        console.log('[NetworkingServiceImpl] Unknown content type response:', text);
+        throw new HttpError(response.status, text || 'Unexpected response type');
       }
     } catch (error) {
+      console.log('[NetworkingServiceImpl] Caught error:', error);
       if (error instanceof Error) {
         throw error;
       }
     }
   }
 
-  async get<T = any>(endpoint: string): Promise<T> {
-    return this.sendRequest(endpoint, {
-      method: HttpMethod.GET,
-    });
+  async get<T = any>(endpoint: string, options?: RequestOptions): Promise<T> {
+    return this.sendRequest(
+      endpoint,
+      {
+        method: HttpMethod.GET,
+        signal: options?.signal,
+      },
+      null,
+      options?.expectedResponseType ?? ResponseContentType.JSON,
+    );
   }
 
-  async post<T = any>(endpoint: string, body: any): Promise<T> {
+  async post<T = any>(endpoint: string, body: any, options?: RequestOptions): Promise<T> {
     return this.sendRequest(
       endpoint,
       {
         method: HttpMethod.POST,
         body: JSON.stringify(body),
+        signal: options?.signal,
       },
-      ContentType.JSON,
+      RequestContentType.JSON,
+      options?.expectedResponseType ?? ResponseContentType.JSON,
     );
   }
 }

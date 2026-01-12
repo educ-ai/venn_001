@@ -1,4 +1,5 @@
 import { useNetworking } from 'business_logic/Networking/NetworkingContext';
+import { ResponseContentType } from 'business_logic/Networking/NetworkingService';
 
 export type ProfileData = {
   firstName: string;
@@ -12,7 +13,9 @@ export function useProfileService() {
 
   return {
     submit: async (data: ProfileData): Promise<void> => {
-      await networking.post('profile-details', data);
+      await networking.post('profile-details', data, {
+        expectedResponseType: ResponseContentType.PlainText,
+      });
     },
   };
 }

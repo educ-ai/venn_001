@@ -1,5 +1,8 @@
 import { renderHook } from '@testing-library/react-native';
-import { NetworkingService } from 'business_logic/Networking/NetworkingService';
+import {
+  NetworkingService,
+  ResponseContentType,
+} from 'business_logic/Networking/NetworkingService';
 import { useProfileService } from 'business_logic/hooks/useProfileService';
 
 jest.mock('business_logic/Networking/NetworkingContext');
@@ -35,7 +38,11 @@ describe('useProfileService', () => {
     it('calls networking with correct endpoint and body', async () => {
       mockNetworking.post.mockResolvedValue({});
       await profileService.submit(VALID_PROFILE);
-      expect(mockNetworking.post).toHaveBeenCalledWith('profile-details', VALID_PROFILE);
+      expect(mockNetworking.post).toHaveBeenCalledWith(
+        'profile-details',
+        VALID_PROFILE,
+        { expectedResponseType: ResponseContentType.PlainText },
+      );
     });
 
     it('resolves when submission succeeds', async () => {

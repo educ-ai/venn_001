@@ -1,5 +1,11 @@
+export enum ResponseContentType {
+  JSON = 'application/json',
+  PlainText = 'text/plain',
+}
+
 export type RequestOptions = {
   signal?: AbortSignal;
+  expectedResponseType?: ResponseContentType;
 };
 
 export interface NetworkingService {
