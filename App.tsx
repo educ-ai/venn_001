@@ -9,7 +9,7 @@ import { HomeScreen } from 'features/home/HomeScreen';
 import { API_BASE_URL } from 'business_logic/constants';
 import i18n from 'localization/i18n';
 
-const ALWAYS_FAIL = true;
+const ALWAYS_FAIL = false;
 
 function App(): React.JSX.Element {
   const networkingService = ALWAYS_FAIL

@@ -13,7 +13,10 @@ import { FormTextInput } from 'components/Form/FormTextInput';
 import { FormErrorText } from 'components/Form/FormErrorText';
 import { OnboardingHeaderView } from 'features/onboarding/components/OnboardingHeaderView';
 import { OnboardingFormButton } from 'features/onboarding/components/OnboardingFormButton';
-import { useOnboardingFormStep1 } from 'features/onboarding/hooks/useOnboardingFormStep1';
+import {
+  useOnboardingFormStep1,
+  CorporationValidationState,
+} from 'features/onboarding/hooks/useOnboardingFormStep1';
 import {
   onboardingFormStep1Schema,
   type OnboardingFormStep1Data,
@@ -25,19 +28,10 @@ import {
 import { filterNameInput } from 'features/onboarding/utils/nameFilter';
 import { filterPhoneInput } from 'features/onboarding/utils/phoneFilter';
 import { filterCorporationNumberInput } from 'features/onboarding/utils/corporationNumberFilter';
-
-type AccessoryState = 'none' | 'verifying' | 'correct';
-
-function getAccessoryState(
-  value: string,
-  isTouched: boolean,
-  hasError: boolean,
-): AccessoryState {
-  if (!isTouched || value.length === 0 || hasError) {
-    return 'none';
-  }
-  return 'correct';
-}
+import {
+  getAccessoryState,
+  getCorporationAccessoryState,
+} from 'features/onboarding/utils/accessoryState';
 
 export function OnboardingFormStep1(): React.JSX.Element {
   const { t } = useTranslation();
@@ -47,6 +41,7 @@ export function OnboardingFormStep1(): React.JSX.Element {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isValid, touchedFields },
   } = useForm<OnboardingFormStep1Data>({
     resolver: zodResolver(onboardingFormStep1Schema),
@@ -59,8 +54,27 @@ export function OnboardingFormStep1(): React.JSX.Element {
     },
   });
 
-  const { isSubmitting, submitForm } = useOnboardingFormStep1({
-    onSubmitSuccess: () => showSuccessAlert(() => reset()),
+  const corporationNumber = watch('corporationNumber');
+
+  const {
+    isSubmitting,
+    isFormSubmittable,
+    hasCorporationError,
+    corporationErrorMessage,
+    submitForm,
+    corporationValidation,
+    resetCorporationValidation,
+  } = useOnboardingFormStep1({
+    isFormValid: isValid,
+    corporationNumberFormError: errors.corporationNumber?.message,
+    isCorporationNumberTouched: !!touchedFields.corporationNumber,
+    corporationNumberValue: corporationNumber,
+    onSubmitSuccess: () => {
+      showSuccessAlert(() => {
+        reset();
+        resetCorporationValidation();
+      });
+    },
     onSubmitFailure: errorMessage => showFailureAlert(errorMessage),
   });
 
@@ -96,11 +110,7 @@ export function OnboardingFormStep1(): React.JSX.Element {
                     placeholder={t('onboarding.placeholder.firstName')}
                     maxLength={50}
                     error={!!errors.firstName && touchedFields.firstName}
-                    accessoryState={getAccessoryState(
-                      value,
-                      !!touchedFields.firstName,
-                      !!errors.firstName,
-                    )}
+                    accessoryState={getAccessoryState(value, !!errors.firstName)}
                     editable={!isSubmitting}
                   />
                 )}
@@ -122,11 +132,7 @@ export function OnboardingFormStep1(): React.JSX.Element {
                     placeholder={t('onboarding.placeholder.lastName')}
                     maxLength={50}
                     error={!!errors.lastName && touchedFields.lastName}
-                    accessoryState={getAccessoryState(
-                      value,
-                      !!touchedFields.lastName,
-                      !!errors.lastName,
-                    )}
+                    accessoryState={getAccessoryState(value, !!errors.lastName)}
                     editable={!isSubmitting}
                   />
                 )}
@@ -148,11 +154,7 @@ export function OnboardingFormStep1(): React.JSX.Element {
                     placeholder={t('onboarding.placeholder.phone')}
                     keyboardType="phone-pad"
                     error={!!errors.phone && touchedFields.phone}
-                    accessoryState={getAccessoryState(
-                      value,
-                      !!touchedFields.phone,
-                      !!errors.phone,
-                    )}
+                    accessoryState={getAccessoryState(value, !!errors.phone)}
                     editable={!isSubmitting}
                   />
                 )}
@@ -176,26 +178,20 @@ export function OnboardingFormStep1(): React.JSX.Element {
                     placeholder={t('onboarding.placeholder.corporationNumber')}
                     maxLength={9}
                     keyboardType="number-pad"
-                    error={!!errors.corporationNumber && touchedFields.corporationNumber}
-                    accessoryState={getAccessoryState(
-                      value,
-                      !!touchedFields.corporationNumber,
-                      !!errors.corporationNumber,
-                    )}
+                    error={hasCorporationError}
+                    accessoryState={getCorporationAccessoryState(corporationValidation.state)}
                     editable={!isSubmitting}
                   />
                 )}
               />
-              {errors.corporationNumber && touchedFields.corporationNumber && (
-                <FormErrorText
-                  message={t(errors.corporationNumber.message ?? '')}
-                />
+              {hasCorporationError && (
+                <FormErrorText message={t(corporationErrorMessage)} />
               )}
             </View>
 
             <OnboardingFormButton
               onPress={handleSubmit(onSubmit)}
-              disabled={!isValid || isSubmitting}
+              disabled={!isFormSubmittable}
               isSubmitting={isSubmitting}
             />
           </View>

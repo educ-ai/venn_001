@@ -19,12 +19,18 @@ const responseSchema = z.union([
   }),
 ]);
 
+type ValidateOptions = {
+  signal?: AbortSignal;
+};
+
 export function useCorporationService() {
   const networking = useNetworking();
 
   return {
-    validate: async (number: string): Promise<void> => {
-      const response = await networking.get(`corporation-number/${number}`);
+    validate: async (number: string, options?: ValidateOptions): Promise<void> => {
+      const response = await networking.get(`corporation-number/${number}`, {
+        signal: options?.signal,
+      });
       const parsed = responseSchema.safeParse(response);
 
       if (!parsed.success) {
