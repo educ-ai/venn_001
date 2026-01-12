@@ -6,17 +6,13 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTheme } from 'theme/ThemeContext';
-import { FormTextInput } from 'components/Form/FormTextInput';
-import { FormErrorText } from 'components/Form/FormErrorText';
+import { ControlledFormField } from 'components/Form/ControlledFormField';
 import { OnboardingHeaderView } from 'features/onboarding/components/OnboardingHeaderView';
 import { OnboardingFormButton } from 'features/onboarding/components/OnboardingFormButton';
-import {
-  useOnboardingFormStep1,
-  CorporationValidationState,
-} from 'features/onboarding/hooks/useOnboardingFormStep1';
+import { useOnboardingFormStep1 } from 'features/onboarding/hooks/useOnboardingFormStep1';
 import {
   onboardingFormStep1Schema,
   type OnboardingFormStep1Data,
@@ -54,6 +50,9 @@ export function OnboardingFormStep1(): React.JSX.Element {
     },
   });
 
+  const firstName = watch('firstName');
+  const lastName = watch('lastName');
+  const phone = watch('phone');
   const corporationNumber = watch('corporationNumber');
 
   const {
@@ -82,6 +81,16 @@ export function OnboardingFormStep1(): React.JSX.Element {
     submitForm(data);
   };
 
+  const getErrorMessage = (
+    error: { message?: string } | undefined,
+    isTouched: boolean | undefined,
+  ): string | undefined => {
+    if (error && isTouched) {
+      return t(error.message ?? '');
+    }
+    return undefined;
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -98,96 +107,54 @@ export function OnboardingFormStep1(): React.JSX.Element {
           <OnboardingHeaderView step={1} />
 
           <View style={{ width: '100%', gap: spacing.lg }}>
-            <View style={{ gap: spacing.xs }}>
-              <Controller
-                control={control}
-                name="firstName"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <FormTextInput
-                    value={value}
-                    onChangeText={text => onChange(filterNameInput(text))}
-                    onBlur={onBlur}
-                    placeholder={t('onboarding.placeholder.firstName')}
-                    maxLength={50}
-                    error={!!errors.firstName && touchedFields.firstName}
-                    accessoryState={getAccessoryState(value, !!errors.firstName)}
-                    editable={!isSubmitting}
-                  />
-                )}
-              />
-              {errors.firstName && touchedFields.firstName && (
-                <FormErrorText message={t(errors.firstName.message ?? '')} />
-              )}
-            </View>
+            <ControlledFormField
+              control={control}
+              name="firstName"
+              placeholder={t('onboarding.placeholder.firstName')}
+              filter={filterNameInput}
+              maxLength={50}
+              errorMessage={getErrorMessage(errors.firstName, touchedFields.firstName)}
+              hasError={!!errors.firstName && touchedFields.firstName}
+              accessoryState={getAccessoryState(firstName, !!errors.firstName)}
+              editable={!isSubmitting}
+            />
 
-            <View style={{ gap: spacing.xs }}>
-              <Controller
-                control={control}
-                name="lastName"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <FormTextInput
-                    value={value}
-                    onChangeText={text => onChange(filterNameInput(text))}
-                    onBlur={onBlur}
-                    placeholder={t('onboarding.placeholder.lastName')}
-                    maxLength={50}
-                    error={!!errors.lastName && touchedFields.lastName}
-                    accessoryState={getAccessoryState(value, !!errors.lastName)}
-                    editable={!isSubmitting}
-                  />
-                )}
-              />
-              {errors.lastName && touchedFields.lastName && (
-                <FormErrorText message={t(errors.lastName.message ?? '')} />
-              )}
-            </View>
+            <ControlledFormField
+              control={control}
+              name="lastName"
+              placeholder={t('onboarding.placeholder.lastName')}
+              filter={filterNameInput}
+              maxLength={50}
+              errorMessage={getErrorMessage(errors.lastName, touchedFields.lastName)}
+              hasError={!!errors.lastName && touchedFields.lastName}
+              accessoryState={getAccessoryState(lastName, !!errors.lastName)}
+              editable={!isSubmitting}
+            />
 
-            <View style={{ gap: spacing.xs }}>
-              <Controller
-                control={control}
-                name="phone"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <FormTextInput
-                    value={value}
-                    onChangeText={text => onChange(filterPhoneInput(text))}
-                    onBlur={onBlur}
-                    placeholder={t('onboarding.placeholder.phone')}
-                    keyboardType="phone-pad"
-                    error={!!errors.phone && touchedFields.phone}
-                    accessoryState={getAccessoryState(value, !!errors.phone)}
-                    editable={!isSubmitting}
-                  />
-                )}
-              />
-              {errors.phone && touchedFields.phone && (
-                <FormErrorText message={t(errors.phone.message ?? '')} />
-              )}
-            </View>
+            <ControlledFormField
+              control={control}
+              name="phone"
+              placeholder={t('onboarding.placeholder.phone')}
+              filter={filterPhoneInput}
+              keyboardType="phone-pad"
+              errorMessage={getErrorMessage(errors.phone, touchedFields.phone)}
+              hasError={!!errors.phone && touchedFields.phone}
+              accessoryState={getAccessoryState(phone, !!errors.phone)}
+              editable={!isSubmitting}
+            />
 
-            <View style={{ gap: spacing.xs }}>
-              <Controller
-                control={control}
-                name="corporationNumber"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <FormTextInput
-                    value={value}
-                    onChangeText={text =>
-                      onChange(filterCorporationNumberInput(text))
-                    }
-                    onBlur={onBlur}
-                    placeholder={t('onboarding.placeholder.corporationNumber')}
-                    maxLength={9}
-                    keyboardType="number-pad"
-                    error={hasCorporationError}
-                    accessoryState={getCorporationAccessoryState(corporationValidation.state)}
-                    editable={!isSubmitting}
-                  />
-                )}
-              />
-              {hasCorporationError && (
-                <FormErrorText message={t(corporationErrorMessage)} />
-              )}
-            </View>
+            <ControlledFormField
+              control={control}
+              name="corporationNumber"
+              placeholder={t('onboarding.placeholder.corporationNumber')}
+              filter={filterCorporationNumberInput}
+              maxLength={9}
+              keyboardType="number-pad"
+              errorMessage={hasCorporationError ? t(corporationErrorMessage) : undefined}
+              hasError={hasCorporationError}
+              accessoryState={getCorporationAccessoryState(corporationValidation.state)}
+              editable={!isSubmitting}
+            />
 
             <OnboardingFormButton
               onPress={handleSubmit(onSubmit)}

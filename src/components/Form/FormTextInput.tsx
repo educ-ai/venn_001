@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useTheme } from 'theme/ThemeContext';
 
-type AccessoryState = 'none' | 'verifying' | 'correct';
+export type AccessoryState = 'none' | 'verifying' | 'correct';
 
 type FormTextInputProps = {
   value: string;
