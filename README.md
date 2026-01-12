@@ -62,6 +62,8 @@ Global state management is an outdated anti-pattern for mobile development.
   # wraps with ThemeProvider, renders HomeScreen
   App.tsx
   src/
+    # all tests
+    __test__
     # theming context, color definitions, useTheme hook
     theme/
       colors.ts
