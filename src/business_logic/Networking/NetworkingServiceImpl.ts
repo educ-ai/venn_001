@@ -1,7 +1,7 @@
 import {
   NetworkingService,
   RequestOptions,
-  ResponseContentType,
+  ContentType,
 } from 'business_logic/Networking/NetworkingService';
 import { log } from 'utils/logger';
 
@@ -20,18 +20,24 @@ enum HttpMethod {
   PATCH = 'PATCH',
 }
 
-enum RequestContentType {
-  JSON = 'application/json',
-}
-
 class NetworkingServiceImpl implements NetworkingService {
   constructor(private apiUrlPath: string) {}
+
+  private parseContentType(header: string): ContentType | null {
+    if (header.includes(ContentType.JSON)) {
+      return ContentType.JSON;
+    }
+    if (header.includes(ContentType.PlainText)) {
+      return ContentType.PlainText;
+    }
+    return null;
+  }
 
   private async sendRequest(
     endpoint: string,
     fetchOptions: RequestInit,
-    requestContentType: RequestContentType | null = null,
-    expectedResponseType: ResponseContentType = ResponseContentType.JSON,
+    requestContentType: ContentType | null = null,
+    expectedResponseType: ContentType = ContentType.JSON,
   ) {
     if (requestContentType) {
       fetchOptions.headers = {
@@ -48,35 +54,38 @@ class NetworkingServiceImpl implements NetworkingService {
 
       log('[NetworkingServiceImpl] Response status:', response.status, response.ok ? 'OK' : 'FAIL');
 
-      const responseContentType = response.headers.get('content-type') || '';
-      log('[NetworkingServiceImpl] Content-Type:', responseContentType);
+      const responseContentTypeHeader = response.headers.get('content-type') || '';
+      log('[NetworkingServiceImpl] Content-Type:', responseContentTypeHeader);
 
-      const isJsonResponse = responseContentType.includes('application/json');
-      const isPlainTextResponse = responseContentType.includes('text/plain');
+      const detectedContentType = this.parseContentType(responseContentTypeHeader);
 
-      if (isJsonResponse) {
-        const jsonObject = await response.json();
-        log('[NetworkingServiceImpl] JSON response:', JSON.stringify(jsonObject));
+      switch (detectedContentType) {
+        case ContentType.JSON: {
+          const jsonObject = await response.json();
+          log('[NetworkingServiceImpl] JSON response:', JSON.stringify(jsonObject));
 
-        if (response.ok) {
-          return jsonObject;
+          if (response.ok) {
+            return jsonObject;
+          }
+
+          log('[NetworkingServiceImpl] Throwing HttpError:', response.status, jsonObject['message']);
+          throw new HttpError(response.status, jsonObject['message']);
         }
+        case ContentType.PlainText: {
+          const text = await response.text();
+          log('[NetworkingServiceImpl] Plain text response:', text);
 
-        log('[NetworkingServiceImpl] Throwing HttpError:', response.status, jsonObject['message']);
-        throw new HttpError(response.status, jsonObject['message']);
-      } else if (isPlainTextResponse) {
-        const text = await response.text();
-        log('[NetworkingServiceImpl] Plain text response:', text);
+          if (response.ok && expectedResponseType === ContentType.PlainText) {
+            return { message: text };
+          }
 
-        if (response.ok && expectedResponseType === ResponseContentType.PlainText) {
-          return { message: text };
+          throw new HttpError(response.status, text || 'Unexpected plain text response');
         }
-
-        throw new HttpError(response.status, text || 'Unexpected plain text response');
-      } else {
-        const text = await response.text();
-        log('[NetworkingServiceImpl] Unknown content type response:', text);
-        throw new HttpError(response.status, text || 'Unexpected response type');
+        default: {
+          const text = await response.text();
+          log('[NetworkingServiceImpl] Unknown content type response:', text);
+          throw new HttpError(response.status, text || 'Unexpected response type');
+        }
       }
     } catch (error) {
       log('[NetworkingServiceImpl] Caught error:', error);
@@ -94,7 +103,7 @@ class NetworkingServiceImpl implements NetworkingService {
         signal: options?.signal,
       },
       null,
-      options?.expectedResponseType ?? ResponseContentType.JSON,
+      options?.expectedResponseType ?? ContentType.JSON,
     );
   }
 
@@ -106,8 +115,8 @@ class NetworkingServiceImpl implements NetworkingService {
         body: JSON.stringify(body),
         signal: options?.signal,
       },
-      RequestContentType.JSON,
-      options?.expectedResponseType ?? ResponseContentType.JSON,
+      ContentType.JSON,
+      options?.expectedResponseType ?? ContentType.JSON,
     );
   }
 }

@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react-native';
 import {
   NetworkingService,
-  ResponseContentType,
+  ContentType,
 } from 'business_logic/Networking/NetworkingService';
 import { useProfileService } from 'business_logic/hooks/useProfileService';
 
@@ -41,7 +41,7 @@ describe('useProfileService', () => {
       expect(mockNetworking.post).toHaveBeenCalledWith(
         'profile-details',
         VALID_PROFILE,
-        { expectedResponseType: ResponseContentType.PlainText },
+        { expectedResponseType: ContentType.PlainText },
       );
     });
 

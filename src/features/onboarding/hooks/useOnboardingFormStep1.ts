@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useProfileService } from 'business_logic/hooks/useProfileService';
 import { useCorporationService } from 'business_logic/hooks/useCorporationService';
 
+const VALIDATION_DEBOUNCE_MS = 300;
+
 type FormData = {
   firstName: string;
   lastName: string;
@@ -117,7 +119,7 @@ export function useOnboardingFormStep1({
     // Debounce the validation
     debounceTimeoutRef.current = setTimeout(() => {
       performValidation(corporationNumberValue);
-    }, 300);
+    }, VALIDATION_DEBOUNCE_MS);
 
     return () => {
       if (debounceTimeoutRef.current) {
