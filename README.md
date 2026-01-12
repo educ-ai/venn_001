@@ -27,7 +27,7 @@ Dangerous coupling if support is dropped and need to rewrite the whole app UI le
     - Same risk as UI component libs: if support is dropped, all themed components need rewriting
     - No meaningful benefit without Restyle's components
 
-### HTTP Client: Plain fetch
+### HTTP Client: Own networking class around Plain fetch
 
 Networking is on the critical path. Full control over request/response handling. No abstraction should hide behavior or introduce upgrade risk
 
