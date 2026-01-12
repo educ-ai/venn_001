@@ -3,6 +3,7 @@ import {
   RequestOptions,
   ResponseContentType,
 } from 'business_logic/Networking/NetworkingService';
+import { log } from 'utils/logger';
 
 export class HttpError extends Error {
   constructor(public status: number, message: string) {
@@ -40,32 +41,32 @@ class NetworkingServiceImpl implements NetworkingService {
     }
 
     const url = `${this.apiUrlPath}/${endpoint}`;
-    console.log('[NetworkingServiceImpl] Request:', fetchOptions.method, url);
+    log('[NetworkingServiceImpl] Request:', fetchOptions.method, url);
 
     try {
       const response = await fetch(url, fetchOptions);
 
-      console.log('[NetworkingServiceImpl] Response status:', response.status, response.ok ? 'OK' : 'FAIL');
+      log('[NetworkingServiceImpl] Response status:', response.status, response.ok ? 'OK' : 'FAIL');
 
       const responseContentType = response.headers.get('content-type') || '';
-      console.log('[NetworkingServiceImpl] Content-Type:', responseContentType);
+      log('[NetworkingServiceImpl] Content-Type:', responseContentType);
 
       const isJsonResponse = responseContentType.includes('application/json');
       const isPlainTextResponse = responseContentType.includes('text/plain');
 
       if (isJsonResponse) {
         const jsonObject = await response.json();
-        console.log('[NetworkingServiceImpl] JSON response:', JSON.stringify(jsonObject));
+        log('[NetworkingServiceImpl] JSON response:', JSON.stringify(jsonObject));
 
         if (response.ok) {
           return jsonObject;
         }
 
-        console.log('[NetworkingServiceImpl] Throwing HttpError:', response.status, jsonObject['message']);
+        log('[NetworkingServiceImpl] Throwing HttpError:', response.status, jsonObject['message']);
         throw new HttpError(response.status, jsonObject['message']);
       } else if (isPlainTextResponse) {
         const text = await response.text();
-        console.log('[NetworkingServiceImpl] Plain text response:', text);
+        log('[NetworkingServiceImpl] Plain text response:', text);
 
         if (response.ok && expectedResponseType === ResponseContentType.PlainText) {
           return { message: text };
@@ -74,11 +75,11 @@ class NetworkingServiceImpl implements NetworkingService {
         throw new HttpError(response.status, text || 'Unexpected plain text response');
       } else {
         const text = await response.text();
-        console.log('[NetworkingServiceImpl] Unknown content type response:', text);
+        log('[NetworkingServiceImpl] Unknown content type response:', text);
         throw new HttpError(response.status, text || 'Unexpected response type');
       }
     } catch (error) {
-      console.log('[NetworkingServiceImpl] Caught error:', error);
+      log('[NetworkingServiceImpl] Caught error:', error);
       if (error instanceof Error) {
         throw error;
       }
